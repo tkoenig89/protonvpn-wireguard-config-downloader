@@ -16,6 +16,7 @@ from protonvpn_wireguard_config_downloader.protonvpn import (
 from protonvpn_wireguard_config_downloader.saver import (
     FileSaver,
     StdoutSaver,
+    JSONSaver,
     VPNServerSaver,
 )
 from protonvpn_wireguard_config_downloader.settings import Settings
@@ -41,6 +42,11 @@ async def download_vpn_wireguard_configs(
             threshold=threshold,
         ):
             saver.save(session, vpn_server)
+            
+        # Write JSON file if using JSONSaver
+        if isinstance(saver, JSONSaver):
+            saver.write_json()
+            
     finally:
         await logout(session)
 
@@ -92,6 +98,25 @@ def main():
     parser.add_argument(
         "-l", "--list", help="List all the servers.", action="store_true"
     )
+    
+    parser.add_argument(
+        "--json", 
+        help="Save server configs to a JSON file grouped by country.",
+        action="store_true"
+    )
+    
+    parser.add_argument(
+        "--json-filename",
+        help="Filename for the JSON output (default: servers.json)",
+        default="servers.json",
+        metavar="FILENAME"
+    )
+    
+    parser.add_argument(
+        "--country",
+        help="Filter servers by country code(s) (e.g., de, us|nl, de,fr,it)",
+        metavar="COUNTRY_CODE(S)"
+    )
 
     parser.add_argument(
         "--features",
@@ -119,6 +144,12 @@ def main():
     saver: VPNServerSaver
     if args.list:
         saver = StdoutSaver()
+    elif args.json:
+        saver = JSONSaver(
+            Settings.WORKDIR, 
+            json_filename=args.json_filename, 
+            country_filter=args.country
+        )
     else:
         saver = FileSaver(Settings.WORKDIR)
 

@@ -28,3 +28,10 @@ The generated wireguard configuration files are to be used in Linux environments
   ```sh
   docker run --rm -it -e USERNAME=abcd@efg -e PASSWORD=pa55word -v ./proton:/data protonvpn-wireguard-config-downloader
   ```
+
+
+- Filter by country
+  ```sh
+  docker run --rm -it -e USERNAME=abcd@efg -e PASSWORD=pa55word -v ./proton:/data protonvpn-wireguard-config-downloader protonvpn-wireguard-configs --country "NL|US" --json
+  ```
+
